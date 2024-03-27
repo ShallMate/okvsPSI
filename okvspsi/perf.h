@@ -10,8 +10,4 @@
 #include "cryptoTools/Common/CLP.h"
 
 
-
-void perfBaxos(oc::CLP& cmd);
-
-
 void perfOkvsPSI(oc::CLP& cmd);

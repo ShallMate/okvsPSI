@@ -602,6 +602,192 @@ namespace volePSI
 
 	};
 
+	class OKVS
+	{
+	public:
+		u64 mNumItems = 0, mNumBins = 0, mItemsPerBin = 0, mWeight = 0, mSsp = 0;
+
+		// the parameters used on a single bim.
+		PaxosParam mPaxosParam;
+		block mSeed;
+
+		bool mDebug = false;
+
+		// when decoding, add the decoded value to the 
+		// output, as opposed to overwriting.
+		bool mAddToDecode = false;
+
+		// initialize the paxos with the given parameter.
+		void init(u64 numItems, u64 binSize, u64 weight, u64 ssp, PaxosParam::DenseType dt, block seed)
+		{
+			mNumItems = numItems;
+			mWeight = weight;
+			mNumBins = (numItems + binSize - 1) / binSize;
+			mItemsPerBin = getBinSize(mNumBins, mNumItems, ssp + std::log2(mNumBins));
+			mSsp = ssp;
+			mSeed = seed;
+			mPaxosParam.init(mItemsPerBin, weight, ssp, dt);
+		}
+
+		// solve the system for the given input vectors.
+		// inputs are the keys
+		// values are the desired values that inputs should decode to.
+		// output is the paxos.
+		// prng should be non-null if randomized paxos is desired.
+		template<typename ValueType>
+		void solve(
+			span<const block> inputs,
+			span<const ValueType> values,
+			span<ValueType> output,
+			oc::PRNG* prng = nullptr,
+			u64 numThreads = 0);
+
+
+		// solve the system for the given input matrices.
+		// inputs are the keys
+		// values are the desired values that inputs should decode to.
+		// output is the paxos.
+		// prng should be non-null if randomized paxos is desired.
+		template<typename ValueType>
+		void solve(
+			span<const block> inputs,
+			MatrixView<const ValueType> values,
+			MatrixView<ValueType> output,
+			oc::PRNG* prng = nullptr,
+			u64 numThreads = 0);
+
+
+		// solve/encode the system.
+		template<typename Vec, typename ConstVec, typename Helper>
+		void solve(
+			span<const block> inputs,
+			ConstVec& values,
+			Vec& output,
+			oc::PRNG* prng,
+			u64 numThreads,
+			Helper& h);
+
+
+		// decode a single input given the paxos p.
+		template<typename ValueType>
+		ValueType decode(const block& input, span<const ValueType> p)
+		{
+			ValueType r;
+			decode(span<const block>(&input, 1), span<ValueType>(&r, 1), p);
+			return r;
+		}
+
+		// decode the given input vector and write the result to values.
+		// inputs are the keys.
+		// values are the output.
+		// p is the paxos vector.
+		template<typename ValueType>
+		void decode(span<const block> input, span<ValueType> values, span<const ValueType> p, u64 numThreads = 0);
+
+
+		// decode the given input matrix and write the result to values.
+		// inputs are the keys.
+		// values are the output.
+		// p is the paxos matrix.
+		template<typename ValueType>
+		void decode(span<const block> input, MatrixView<ValueType> values, MatrixView<const ValueType> p, u64 numThreads = 0);
+
+
+		template<typename Vec, typename ConstVec, typename Helper>
+		void decode(
+			span<const block> inputs,
+			Vec& values,
+			ConstVec& p,
+			Helper& h,
+			u64 numThreads);
+
+
+		//////////////////////////////////////////
+		// private impl
+		//////////////////////////////////////////
+
+
+
+		// solve/encode the system.
+		template<typename IdxType, typename Vec, typename ConstVec, typename Helper>
+		void implParSolve(
+			span<const block> inputs,
+			ConstVec& values,
+			Vec& output,
+			oc::PRNG* prng,
+			u64 numThreads,
+			Helper& h);
+
+		// create the desired number of threads and split up the work.
+		template<typename IdxType, typename Vec, typename ConstVec, typename Helper>
+		void implParDecode(
+			span<const block> inputs,
+			Vec& values,
+			ConstVec& p,
+			Helper& h,
+			u64 numThreads);
+
+
+		// decode the given inputs based on the paxos p. The output is written to values.
+		template<typename IdxType, typename Vec, typename ConstVec, typename Helper>
+		void implDecodeBatch(span<const block> inputs, Vec& values, ConstVec& p, Helper& h);
+
+		// decode the given inputs based on the paxos p. The output is written to values.
+		// this differs from implDecode in that all inputs must be for the same paxos bin.
+		template<typename IdxType, typename Vec, typename ConstVec, typename Helper>
+		void implDecodeBin(
+			u64 binIdx,
+			span<block> hashes,
+			Vec& values,
+			Vec& valuesBuff,
+			span<u64> inIdxs,
+			ConstVec& p,
+			Helper& h,
+			Paxos<IdxType>& paxos);
+
+		// the size of the paxos.
+		u64 size()
+		{
+			return u64(mNumBins * (mPaxosParam.mSparseSize + mPaxosParam.mDenseSize));
+		}
+
+		static u64 getBinSize(u64 numBins, u64 numItems, u64 ssp);
+
+		u64 binIdxCompress(const block& h)
+		{
+			return (h.get<u64>(0) ^ h.get<u64>(1) ^ h.get<u32>(3));
+		}
+
+		u64 modNumBins(const block& h)
+		{
+			return binIdxCompress(h) % mNumBins;
+		}
+
+
+		template<typename Vec, typename Vec2>
+		void check(span<const block> inputs, Vec values, Vec2 output)
+		{
+			auto h = values.defaultHelper();
+			auto v2 = h.newVec(values.size());
+			decode(inputs, v2, output, h, 1);
+
+			for (u64 i = 0; i < values.size(); ++i)
+			{
+				if (h.eq(v2[i],values[i]) == false)
+				{
+					std::cout << "paxos failed to encode. \n"
+						<< "inputs[" << i << "]" << inputs[i] << "\n"
+						<< "seed " << mSeed << "\n"
+						<< "n " << size() << "\n"
+						<< "m " << inputs.size() << "\n"
+						<< std::endl;
+					throw RTE_LOC;
+				}
+			}
+		}
+
+	};
+
 	// invert a gf128 matrix.
 	Matrix<block> gf128Inv(Matrix<block> mtx);
 
@@ -613,7 +799,8 @@ namespace volePSI
 	//template<typename IdxType>
 	//std::ostream& operator<<(std::ostream& o, const PaxosDiff<IdxType>& s);
 
-}
+	}
+
 
 
 
@@ -621,4 +808,5 @@ namespace volePSI
 // Since paxos is a template, we include the impl file.
 #ifndef NO_INCLUDE_PAXOS_IMPL
 #include "PaxosImpl.h"
+#include "OKVSImpl.h"
 #endif // !NO_INCLUDE_PAXOS_IMPL

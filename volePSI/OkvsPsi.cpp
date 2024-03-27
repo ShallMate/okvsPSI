@@ -1,12 +1,8 @@
 #include "OkvsPsi.h"
 #include <array>
 #include <future>
-//#include "thirdparty/parallel-hashmap/parallel_hashmap/phmap.h"
 namespace volePSI
 {
-
-
-
     template <typename T>
     struct Buffer : public span<T>
     {
@@ -236,7 +232,7 @@ namespace volePSI
             mt->hashingDoneFu = mt->hashingDoneProm.get_future().share();
 
             mt->numThreads = std::max<u64>(1, mNumThreads);
-            mt->binSize = Baxos::getBinSize(mNumThreads, mRecverSize, mSsp);
+            mt->binSize = OKVS::getBinSize(mNumThreads, mRecverSize, mSsp);
             mt->divider = libdivide::libdivide_u32_gen(mt->numThreads);
 
             mt->routine = [&](u64 thrdIdx)

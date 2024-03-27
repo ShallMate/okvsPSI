@@ -277,7 +277,7 @@ namespace volePSI
             wr = block{},
             ws = block{},
             Hws = std::array<u8, 32> {},
-            paxos = Baxos{},
+            paxos = OKVS{},
             hPtr = std::unique_ptr<block[]>{},
             h = span<block>{},
             p = std::move(UninitVec{}),

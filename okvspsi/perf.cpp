@@ -7,74 +7,23 @@
 using namespace oc;
 using namespace volePSI;;
 
-void perfBaxos(oc::CLP& cmd)
-{
-	auto n = cmd.getOr("n", 1ull << cmd.getOr("nn", 10));
-	auto t = cmd.getOr("t", 1ull);
-	//auto rand = cmd.isSet("rand");
-	auto v = cmd.getOr("v", cmd.isSet("v") ? 1 : 0);
-	auto w = cmd.getOr("w", 3);
-	auto ssp = cmd.getOr("ssp", 40);
-	auto dt = cmd.isSet("binary") ? PaxosParam::Binary : PaxosParam::GF128;
-	auto nt = cmd.getOr("nt", 0);
-
-	//PaxosParam pp(n, w, ssp, dt);
-	auto binSize = 1 << cmd.getOr("lbs", 15);
-	u64 baxosSize;
-	{
-		Baxos paxos;
-		paxos.init(n, binSize, w, ssp, dt, oc::ZeroBlock);
-		baxosSize = paxos.size();
-	}
-	std::vector<block> key(n), val(n), pax(baxosSize);
-	PRNG prng(ZeroBlock);
-	prng.get<block>(key);
-	prng.get<block>(val);
-
-	Timer timer;
-	auto start = timer.setTimePoint("start");
-	auto end = start;
-	for (u64 i = 0; i < t; ++i)
-	{
-		Baxos paxos;
-		paxos.init(n, binSize, w, ssp, dt, block(i, i));
-
-		//if (v > 1)
-		//	paxos.setTimer(timer);
-
-		paxos.solve<block>(key, val, pax, nullptr, nt);
-		timer.setTimePoint("s" + std::to_string(i));
-
-		paxos.decode<block>(key, val, pax, nt);
-
-		end = timer.setTimePoint("d" + std::to_string(i));
-	}
-
-	if (v)
-		std::cout << timer << std::endl;
-
-	auto tt = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / double(1000);
-	std::cout << "total " << tt << "ms, e=" << double(baxosSize) / n << std::endl;
-}
-
-
 
 void perfOkvsPSI(oc::CLP& cmd)
 {
 	auto n = 1ull << cmd.getOr("nn", 10);
 	auto t = cmd.getOr("t", 1ull);
-	auto mal = cmd.isSet("malicious");
+	auto mal = cmd.isSet("m");
 	auto v = cmd.isSet("v") ? cmd.getOr("v", 1) : 0;
 	auto nt = cmd.getOr("nt", 1);
-	bool fakeBase = cmd.isSet("fakeBase");
+	//auto e =cmd.getOr("e",0.01);
+	bool fakeBase = cmd.isSet("f");
 	bool noCompress = cmd.isSet("nc");
 	auto type = oc::DefaultMultType;
 	PRNG prng(ZeroBlock);
 	Timer timer, s, r;
-	std::cout << "nt " << nt << " fakeBase " << int(fakeBase) << " n " << n << std::endl;
+	std::cout << "thread = " << nt << " ; input size = " << n << std::endl;
 	OkvsPsiReceiver recv;
 	OkvsPsiSender send;
-
 	if (fakeBase)
 	{
 		std::vector<std::array<block, 2>> sendBase(128);
@@ -136,7 +85,8 @@ void perfOkvsPSI(oc::CLP& cmd)
 	{
 
 		std::cout << timer << std::endl;
-		std::cout << sockets[0].bytesSent() << " " << sockets[1].bytesSent() << std::endl;
+		//std::cout <<"The receiver sends "<< sockets[0].bytesSent() << " bytes." <<std::endl;
+		//std::cout<<"The sender sends " <<sockets[1].bytesSent()<<" bytes." << std::endl;
 		if (v > 1)
 			std::cout << "s\n" << s << "\nr\n" << r << std::endl;
 		//std::cout <<"-------------log--------------------\n" << coproto::getLog() << std::endl;

@@ -23,6 +23,10 @@ python3 build.py --install=install/prefix/path
 ```
 cd out/build/linux/okvspsi/
 ./okvspsi -nn 20 -v 
+-nn the log_2^n of the input size
+-v print run time
+-m malicious security
+-nt threadnum
 ```
 
 ### Okvs Result example
