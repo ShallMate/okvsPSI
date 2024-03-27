@@ -18,7 +18,7 @@ namespace volePSI
             fork = Socket{}
         );
 
-        setTimePoint("RsOprfSender::send-begin");
+        setTimePoint("OkvsOprfSender::send-begin");
         ws = prng.get();
 
         mPaxos.init(n, mBinSize, 3, mSsp, PaxosParam::GF128, oc::ZeroBlock);
@@ -44,10 +44,10 @@ namespace volePSI
             | macoro::make_eager();
 
         MC_AWAIT(chl.recv(mPaxos.mSeed));
-        setTimePoint("RsOprfSender::recv-seed");
+        setTimePoint("OkvsOprfSender::recv-seed");
         MC_AWAIT(fu);
         mB = mVoleSender.mB;
-        setTimePoint("RsOprfSender::send-vole");
+        setTimePoint("OkvsOprfSender::send-vole");
 
 
 
@@ -57,19 +57,19 @@ namespace volePSI
             MC_AWAIT(chl.recv(mW));
             MC_AWAIT(chl.send(std::move(ws)));
             mW = mW ^ ws;
-            setTimePoint("RsOprfSender::recv-mal");
+            setTimePoint("OkvsOprfSender::recv-mal");
         }
 
         pPtr.reset(new block[mPaxos.size()]);
         pp = span<block>(pPtr.get(), mPaxos.size());
 
-        setTimePoint("RsOprfSender::alloc ");
+        setTimePoint("OkvsOprfSender::alloc ");
 
         if (0)
         {
             MC_AWAIT(chl.recv(pp));
 
-            setTimePoint("RsOprfSender::send-recv");
+            setTimePoint("OkvsOprfSender::send-recv");
             {
 
                 auto main = mB.size() / 8 * 8;
@@ -95,7 +95,7 @@ namespace volePSI
                     mB[i] = mB[i] ^ mD.gf128Mul(pp[i]);
                 }
             }
-            setTimePoint("RsOprfSender::send-gf128Mul");
+            setTimePoint("OkvsOprfSender::send-gf128Mul");
         }
         else
         {
@@ -110,9 +110,9 @@ namespace volePSI
                 subB = remB.subspan(0, subPp.size());
                 remB = remB.subspan(subPp.size());
 
-                setTimePoint("RsOprfSender::pre*-" + std::to_string(recvIdx));
+                setTimePoint("OkvsOprfSender::pre*-" + std::to_string(recvIdx));
                 MC_AWAIT(chl.recv(subPp));
-                setTimePoint("RsOprfSender::recv-" + std::to_string(recvIdx));
+                setTimePoint("OkvsOprfSender::recv-" + std::to_string(recvIdx));
 
                 {
 
@@ -139,7 +139,7 @@ namespace volePSI
                         *b = *b ^ mD.gf128Mul(*p);
                     }
                 }
-                setTimePoint("RsOprfSender::gf128Mul-" + std::to_string(recvIdx));
+                setTimePoint("OkvsOprfSender::gf128Mul-" + std::to_string(recvIdx));
 
                 ++recvIdx;
 
@@ -159,11 +159,11 @@ namespace volePSI
     }
     void OkvsOprfSender::eval(span<const block> val, span<block> output, u64 numThreads)
     {
-        setTimePoint("RsOprfSender::eval-begin");
+        setTimePoint("OkvsOprfSender::eval-begin");
 
         mPaxos.decode<block>(val, output, mB, numThreads);
 
-        setTimePoint("RsOprfSender::eval-decode");
+        setTimePoint("OkvsOprfSender::eval-decode");
 
         auto main = val.size() / 8 * 8;
         auto o = output.data();
@@ -246,7 +246,7 @@ namespace volePSI
             }
         }
 
-        setTimePoint("RsOprfSender::eval-hash");
+        setTimePoint("OkvsOprfSender::eval-hash");
 
     }
 
@@ -290,7 +290,7 @@ namespace volePSI
             fork = Socket{}
         );
 
-        setTimePoint("RsOprfReceiver::receive-begin");
+        setTimePoint("OkvsOprfReceiver::receive-begin");
 
         if (values.size() != outputs.size())
             throw RTE_LOC;
@@ -320,24 +320,24 @@ namespace volePSI
         h = span<block>(hPtr.get(), values.size());
 
         oc::mAesFixedKey.hashBlocks(values, h);
-        setTimePoint("RsOprfReceiver::receive-hash");
+        setTimePoint("OkvsOprfReceiver::receive-hash");
 
         //auto pPtr = std::make_shared<std::vector<block>>(paxos.size());
         //span<block> p = *pPtr;
 
         p.resize(paxos.size());
 
-        setTimePoint("RsOprfReceiver::receive-alloc");
+        setTimePoint("OkvsOprfReceiver::receive-alloc");
 
         paxos.solve<block>(values, h, p, nullptr, numThreads);
-        setTimePoint("RsOprfReceiver::receive-solve");
+        setTimePoint("OkvsOprfReceiver::receive-solve");
         MC_AWAIT(fu);
 
         // a + b  = c * d
         a = mVoleRecver.mA;
         c = mVoleRecver.mC;
 
-        setTimePoint("RsOprfReceiver::receive-vole");
+        setTimePoint("OkvsOprfReceiver::receive-vole");
 
 
         if (mMalicious)
@@ -372,7 +372,7 @@ namespace volePSI
                     p[i] = p[i] ^ c[i];
             }
 
-            setTimePoint("RsOprfReceiver::receive-xor");
+            setTimePoint("OkvsOprfReceiver::receive-xor");
 
             // send c ^ p
             MC_AWAIT(chl.send(std::move(p)));
@@ -414,14 +414,14 @@ namespace volePSI
                         *pp = *pp ^ *cc;
                 }
 
-                setTimePoint("RsOprfReceiver::receive-xor");
+                setTimePoint("OkvsOprfReceiver::receive-xor");
 
                 if (p.size() != subP.size())
                     MC_AWAIT(chl.send(std::move(subP)));
                 else
                     MC_AWAIT(chl.send(std::move(p)));
 
-                setTimePoint("RsOprfReceiver::receive-send");
+                setTimePoint("OkvsOprfReceiver::receive-send");
 
                 ++ii;
             }
@@ -430,7 +430,7 @@ namespace volePSI
 
         paxos.decode<block>(values, outputs, a, numThreads);
 
-        setTimePoint("RsOprfReceiver::receive-decode");
+        setTimePoint("OkvsOprfReceiver::receive-decode");
 
         if (mMalicious)
         {
@@ -494,7 +494,7 @@ namespace volePSI
             oc::mAesFixedKey.hashBlocks(outputs, outputs);
         }
 
-        setTimePoint("RsOprfReceiver::receive-hash");
+        setTimePoint("OkvsOprfReceiver::receive-hash");
         MC_END();
     }
 

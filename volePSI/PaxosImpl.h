@@ -152,8 +152,6 @@ namespace volePSI
 		return ret;
 	}
 
-
-	// See paper https://eprint.iacr.org/2022/320.pdf
 	inline void  PaxosParam::init(u64 numItems, u64 weight, u64 ssp, DenseType dt)
 	{
 		if (weight < 2)

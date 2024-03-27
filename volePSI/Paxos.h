@@ -416,7 +416,6 @@ namespace volePSI
 
 	};
 
-	// a binned version of paxos. Internally calls paxos.
 	class Baxos
 	{
 	public:
