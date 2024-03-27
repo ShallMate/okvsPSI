@@ -25,6 +25,6 @@ cd out/build/linux/okvspsi/
 ./okvspsi -nn 20 -v 
 ```
 
-### Result example
+### Okvs Result example
 ![OKVS结果](./okvs_result.png)
 
