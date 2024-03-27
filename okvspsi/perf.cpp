@@ -59,7 +59,7 @@ void perfBaxos(oc::CLP& cmd)
 
 
 
-void perfPSI(oc::CLP& cmd)
+void perfOkvsPSI(oc::CLP& cmd)
 {
 	auto n = 1ull << cmd.getOr("nn", 10);
 	auto t = cmd.getOr("t", 1ull);

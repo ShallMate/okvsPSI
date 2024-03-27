@@ -14,4 +14,4 @@
 void perfBaxos(oc::CLP& cmd);
 
 
-void perfPSI(oc::CLP& cmd);
+void perfOkvsPSI(oc::CLP& cmd);

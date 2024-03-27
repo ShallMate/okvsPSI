@@ -19,3 +19,9 @@ or
 python3 build.py --install=install/prefix/path
 ```
 
+### Use
+```
+cd out/build/linux/okvspsi/
+./okvspsi -nn 20 -v 
+```
+

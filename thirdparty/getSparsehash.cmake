@@ -1,5 +1,5 @@
 set(DEP_NAME            sparsehash-c11)
-set(GIT_REPOSITORY      https://github.com/sparsehash/sparsehash-c11.git)
+set(GIT_REPOSITORY      https://521github.com/sparsehash/sparsehash-c11.git)
 set(GIT_TAG             "edd6f1180156e76facc1c0449da245208ab39503" )
 
 set(CLONE_DIR "${CMAKE_CURRENT_LIST_DIR}/${DEP_NAME}")

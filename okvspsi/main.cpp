@@ -7,7 +7,7 @@ int main(int argc, char** argv)
 {
     oc::CLP cmd(argc, argv);
 
-    perfPSI(cmd);
+    perfOkvsPSI(cmd);
 
     return 0;
 }
