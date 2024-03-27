@@ -1,0 +1,2 @@
+/opt/rh/devtoolset-11/root/usr/bin/ar qc libvolePSI_Tests.a CMakeFiles/volePSI_Tests.dir/Paxos_Tests.cpp.o CMakeFiles/volePSI_Tests.dir/RsOprf_Tests.cpp.o CMakeFiles/volePSI_Tests.dir/RsPsi_Tests.cpp.o CMakeFiles/volePSI_Tests.dir/UnitTests.cpp.o CMakeFiles/volePSI_Tests.dir/FileBase_Tests.cpp.o CMakeFiles/volePSI_Tests.dir/GMW_Tests.cpp.o CMakeFiles/volePSI_Tests.dir/RsCpsi_Tests.cpp.o CMakeFiles/volePSI_Tests.dir/RsOpprf_Tests.cpp.o
+/opt/rh/devtoolset-11/root/usr/bin/ranlib libvolePSI_Tests.a

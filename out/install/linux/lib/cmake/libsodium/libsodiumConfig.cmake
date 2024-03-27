@@ -1,0 +1,1 @@
+set(libsodium_pic OFF)
