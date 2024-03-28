@@ -5,7 +5,15 @@
 
 #include "libdivide.h"
 using namespace oc;
-using namespace volePSI;;
+using namespace volePSI;
+
+/*
+std::size_t bytesSent(std::array<cp::LocalAsyncSocket, 2> sockets,int role,auto e) {
+			u64 com = sockets[role].bytesSent();
+			return com;
+		}
+*/
+
 
 
 void perfOkvsPSI(oc::CLP& cmd)
@@ -17,7 +25,7 @@ void perfOkvsPSI(oc::CLP& cmd)
 	auto mal = cmd.isSet("m");
 	auto v = cmd.isSet("v") ? cmd.getOr("v", 1) : 0;
 	auto nt = cmd.getOr("nt", 1);
-	//auto e =cmd.getOr("e",0.01);
+	auto e =cmd.getOr("e",0.01);
 	bool fakeBase = cmd.isSet("f");
 	bool noCompress = cmd.isSet("nc");
 	auto type = oc::DefaultMultType;
@@ -41,8 +49,8 @@ void perfOkvsPSI(oc::CLP& cmd)
 		send.mSender.mVoleSender.setBaseOts(recvBase, recvChoice);
 		timer.setTimePoint("fakeBase");
 	}
-	recv.init(ns, nr, 40, ZeroBlock, mal, nt);
-	send.init(ns, nr, 40, ZeroBlock, mal, nt);
+	recv.init(ns, nr, 40, ZeroBlock, mal, nt,e);
+	send.init(ns, nr, 40, ZeroBlock, mal, nt,e);
 
 	recv.setMultType(type);
 	send.setMultType(type);
@@ -89,8 +97,8 @@ void perfOkvsPSI(oc::CLP& cmd)
 	{
 
 		std::cout << timer << std::endl;
-		std::cout <<"The receiver sends "<< sockets[0].bytesSent() << " bytes." <<std::endl;
-		std::cout<<"The sender sends " <<sockets[1].bytesSent()<<" bytes." << std::endl;
+		std::cout <<"The receiver sends "<< bytesSent(sockets,0,e) << " bytes." <<std::endl;
+		std::cout<<"The sender sends " <<bytesSent(sockets,1,e)<<" bytes." << std::endl;
 		if (v > 1)
 			std::cout << "s\n" << s << "\nr\n" << r << std::endl;
 		//std::cout <<"-------------log--------------------\n" << coproto::getLog() << std::endl;

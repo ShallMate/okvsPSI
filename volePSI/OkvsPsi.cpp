@@ -22,7 +22,8 @@ namespace volePSI
         block seed,
         bool malicious,
         u64 numThreads, 
-        bool useReducedRounds)
+        bool useReducedRounds,
+        double e)
     {
         mSenderSize = senderSize;
         mRecverSize = recverSize;
