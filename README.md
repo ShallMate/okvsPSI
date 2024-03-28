@@ -22,8 +22,9 @@ python3 build.py --install=install/prefix/path
 ### Use
 ```
 cd out/build/linux/okvspsi/
-./okvspsi -nn 20 -v 
--nn the log_2^n of the input size
+./okvspsi -nnr 20 -nns 20 -v -m  
+-nnr the log_2^n of the input size of receiver
+-nns the log_2^n of the input size of sender
 -v print run time
 -m malicious security
 -nt threadnum

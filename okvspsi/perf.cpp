@@ -10,7 +10,9 @@ using namespace volePSI;;
 
 void perfOkvsPSI(oc::CLP& cmd)
 {
-	auto n = 1ull << cmd.getOr("nn", 10);
+	//auto n = 1ull << cmd.getOr("nn", 10);
+	auto ns = 1ull << cmd.getOr("nns", 10);
+	auto nr = 1ull << cmd.getOr("nnr", 10);
 	auto t = cmd.getOr("t", 1ull);
 	auto mal = cmd.isSet("m");
 	auto v = cmd.isSet("v") ? cmd.getOr("v", 1) : 0;
@@ -21,7 +23,9 @@ void perfOkvsPSI(oc::CLP& cmd)
 	auto type = oc::DefaultMultType;
 	PRNG prng(ZeroBlock);
 	Timer timer, s, r;
-	std::cout << "thread = " << nt << " ; input size = " << n << std::endl;
+	std::cout << "thread = " << nt << std::endl;
+	std::cout<< "The sender input size = " << ns << std::endl;
+	std::cout<<"The receiver input size = "<<nr<<std::endl;
 	OkvsPsiReceiver recv;
 	OkvsPsiSender send;
 	if (fakeBase)
@@ -37,8 +41,8 @@ void perfOkvsPSI(oc::CLP& cmd)
 		send.mSender.mVoleSender.setBaseOts(recvBase, recvChoice);
 		timer.setTimePoint("fakeBase");
 	}
-	recv.init(n, n, 40, ZeroBlock, mal, nt);
-	send.init(n, n, 40, ZeroBlock, mal, nt);
+	recv.init(ns, nr, 40, ZeroBlock, mal, nt);
+	send.init(ns, nr, 40, ZeroBlock, mal, nt);
 
 	recv.setMultType(type);
 	send.setMultType(type);
@@ -59,7 +63,7 @@ void perfOkvsPSI(oc::CLP& cmd)
 		send.mSender.mBinSize = binSize;
 	}
 
-	std::vector<block> recvSet(n), sendSet(n);
+	std::vector<block> recvSet(nr), sendSet(ns);
 	prng.get<block>(recvSet);
 	prng.get<block>(sendSet);
 
@@ -85,8 +89,8 @@ void perfOkvsPSI(oc::CLP& cmd)
 	{
 
 		std::cout << timer << std::endl;
-		//std::cout <<"The receiver sends "<< sockets[0].bytesSent() << " bytes." <<std::endl;
-		//std::cout<<"The sender sends " <<sockets[1].bytesSent()<<" bytes." << std::endl;
+		std::cout <<"The receiver sends "<< sockets[0].bytesSent() << " bytes." <<std::endl;
+		std::cout<<"The sender sends " <<sockets[1].bytesSent()<<" bytes." << std::endl;
 		if (v > 1)
 			std::cout << "s\n" << s << "\nr\n" << r << std::endl;
 		//std::cout <<"-------------log--------------------\n" << coproto::getLog() << std::endl;
