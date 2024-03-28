@@ -22,10 +22,10 @@ void perfOkvsPSI(oc::CLP& cmd)
 	auto ns = 1ull << cmd.getOr("nns", 10);
 	auto nr = 1ull << cmd.getOr("nnr", 10);
 	auto t = cmd.getOr("t", 1ull);
+	auto e = cmd.getOr("e", 0.01);
 	auto mal = cmd.isSet("m");
 	auto v = cmd.isSet("v") ? cmd.getOr("v", 1) : 0;
 	auto nt = cmd.getOr("nt", 1);
-	auto e =cmd.getOr("e",0.01);
 	bool fakeBase = cmd.isSet("f");
 	bool noCompress = cmd.isSet("nc");
 	auto type = oc::DefaultMultType;
@@ -49,8 +49,8 @@ void perfOkvsPSI(oc::CLP& cmd)
 		send.mSender.mVoleSender.setBaseOts(recvBase, recvChoice);
 		timer.setTimePoint("fakeBase");
 	}
-	recv.init(ns, nr, 40, ZeroBlock, mal, nt,e);
-	send.init(ns, nr, 40, ZeroBlock, mal, nt,e);
+	recv.init(ns, nr, 40, ZeroBlock, mal, nt);
+	send.init(ns, nr, 40, ZeroBlock, mal, nt);
 
 	recv.setMultType(type);
 	send.setMultType(type);

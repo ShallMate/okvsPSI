@@ -22,7 +22,7 @@ namespace volePSI
             bool mUseReducedRounds = false;
             bool mDebug = false;
 
-            void init(u64 senderSize, u64 recverSize, u64 statSecParam, block seed, bool malicious, u64 numThreads, bool useReducedRounds = false, double e = 0.01);
+            void init(u64 senderSize, u64 recverSize, u64 statSecParam, block seed, bool malicious, u64 numThreads, bool useReducedRounds = false);
 
         };
     }
@@ -52,7 +52,7 @@ namespace volePSI
 
     std::size_t bytesSent(std::array<osuCrypto::cp::LocalAsyncSocket, 2> sockets,int role,auto e) {
 			u64 com = sockets[role].bytesSent();
-            if (role == 0){
+            if (role ==0){
                 com = (1+e)/1.3*com;
             }
 			return com;
