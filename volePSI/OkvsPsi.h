@@ -52,6 +52,7 @@ namespace volePSI
 
     std::size_t bytesSent(std::array<osuCrypto::cp::LocalAsyncSocket, 2> sockets,int role,auto e) {
 			u64 com = sockets[role].bytesSent();
+            
             if (role ==0){
                 com = (1+e)/1.3*com;
             }
