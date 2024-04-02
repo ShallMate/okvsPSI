@@ -1,13 +1,12 @@
-# Okvs
-
-This library is basically based on [volepsi](https://github.com/Visa-Research/volepsi), and I would like to express my gratitude here.
-
 ### Build
-okvsPSI
+okvs-based PSI
 ```
 git clone https://github.com/ShallMate/okvsPSI
 cd okvsPSI
 python3 build.py -DVOLE_PSI_ENABLE_BOOST=ON
+
+cd newokvs
+cargo build -r --example perf
 ```
 ### Installing
 
@@ -28,8 +27,13 @@ cd out/build/linux/okvspsi/
 -v print run time
 -m malicious security
 -nt threadnum
+
+cd target/release/examples/
+./perf -n 1048576 -w 448 -e 0.01
+-n how many, default 1048576
+-e epsilon, default 0.01 for OKVS
+-w width, default 448
 ```
 
 ### Okvs Result example
 ![OKVS结果](./okvs_result.png)
-
