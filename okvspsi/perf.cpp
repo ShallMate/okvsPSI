@@ -100,7 +100,7 @@ void perfOkvsPSI(oc::CLP& cmd)
 		std::cout << timer << std::endl;
 		std::cout <<"The receiver sends "<< bytesSent(sockets,0,e) << " bytes." <<std::endl;
 		std::cout<<"The sender sends " <<bytesSent(sockets,1,e)<<" bytes." << std::endl;
-		//std::cout<<"The communication overhead = " <<(bytesSent(sockets,0,e)+bytesSent(sockets,1,e))/1024/1024<<" MB." << std::endl;
+		std::cout<<"The communication overhead = " <<double(bytesSent(sockets,0,e)+bytesSent(sockets,1,e))/1024/1024<<" MB." << std::endl;
 		if (v > 1)
 			std::cout << "s\n" << s << "\nr\n" << r << std::endl;
 		//std::cout <<"-------------log--------------------\n" << coproto::getLog() << std::endl;
