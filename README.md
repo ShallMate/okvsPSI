@@ -37,3 +37,9 @@ cd target/release/examples/
 
 ### Okvs Result example
 ![OKVS结果](./okvs_result.png)
+
+### Malicious PSI Result example
+![mPSI结果](./mPSIexample.png)
+
+### Semi-Honest PSI Result example
+![mPSI结果](./smPSIexample.png)
