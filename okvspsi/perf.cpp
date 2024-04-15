@@ -2,17 +2,13 @@
 #include "cryptoTools/Network/IOService.h"
 #include "volePSI/OkvsPsi.h"
 #include "volePSI/SimpleIndex.h"
-
+#include "coproto/Socket/AsioSocket.h"
 #include "libdivide.h"
+#include "volePSI/fileBased.h"
+
 using namespace oc;
 using namespace volePSI;
 
-/*
-std::size_t bytesSent(std::array<cp::LocalAsyncSocket, 2> sockets,int role,auto e) {
-			u64 com = sockets[role].bytesSent();
-			return com;
-		}
-*/
 
 
 
@@ -106,6 +102,84 @@ void perfOkvsPSI(oc::CLP& cmd)
 		//std::cout <<"-------------log--------------------\n" << coproto::getLog() << std::endl;
 	}
 }
+
+void networkSocketExampleRun(oc::CLP& cmd)
+{
+    try {
+        auto recver = cmd.get<int>("r");
+        bool client = !cmd.getOr("server", recver);
+        auto ip = cmd.getOr<std::string>("ip", "localhost:1212");
+        auto ns = cmd.getOr("ns", 100ull);
+        auto nr = cmd.getOr("nr", 100ull);
+        // The statistical security parameter.
+        auto ssp = cmd.getOr("ssp", 40ull);
+        // Malicious Security.
+        auto mal = cmd.isSet("malicious");
+        // The vole type, default to expand accumulate.
+        auto type = oc::DefaultMultType;
+        // use fewer rounds of communication but more computation.
+        auto useReducedRounds = cmd.isSet("reducedRounds");
+        std::cout << "connecting as " << (client ? "client" : "server") << " at ip " << ip << std::endl;
+        coproto::Socket sock;
+#ifdef COPROTO_ENABLE_BOOST
+            // Perform the TCP/IP.
+            sock = coproto::asioConnect(ip, !client);
+#else
+            throw std::runtime_error("COPROTO_ENABLE_BOOST must be define (via cmake) to use tcp sockets. " COPROTO_LOCATION);
+#endif
+        std::cout << "connected" << std::endl;
+        std::vector<oc::block> set;
+        if (!recver)
+        {
+            // Use dummy set {0,1,...}
+            set.resize(ns);
+            for (oc::u64 i = 0; i < ns; ++i)
+                set[i] = oc::block(0, i);
+
+            // configure
+            volePSI::OkvsPsiSender sender;
+            sender.setMultType(type);
+            sender.init(ns, nr, ssp, oc::sysRandomSeed(), mal, 1, useReducedRounds);
+
+            std::cout << "sender start\n";
+            auto start = std::chrono::system_clock::now();
+
+            // Run the protocol.
+            macoro::sync_wait(sender.run(set, sock));
+
+            auto done = std::chrono::system_clock::now();
+            std::cout << "sender done, " << std::chrono::duration_cast<std::chrono::milliseconds>(done-start).count() <<"ms" << std::endl;
+        }
+        else
+        {
+            // Use dummy set {0,1,...}
+            set.resize(nr);
+            for (oc::u64 i = 0; i < nr; ++i)
+                set[i] = oc::block(0, i);
+
+            // Configure.
+            volePSI::OkvsPsiReceiver recevier;
+            recevier.setMultType(type);
+            recevier.init(ns, nr, ssp, oc::sysRandomSeed(), mal, 1, useReducedRounds);
+
+            std::cout << "recver start\n";
+            auto start = std::chrono::system_clock::now();
+
+            // Run the protocol.
+            macoro::sync_wait(recevier.run(set, sock));
+
+            auto done = std::chrono::system_clock::now();
+            std::cout << "sender done, " << std::chrono::duration_cast<std::chrono::milliseconds>(done-start).count() <<"ms" << std::endl;
+        }
+    }
+    catch (std::exception& e)
+    {
+        std::cout << e.what() << std::endl;
+    }
+}
+
+
+
 
 
 

@@ -7,7 +7,7 @@ int main(int argc, char** argv)
 {
     oc::CLP cmd(argc, argv);
 
-    perfOkvsPSI(cmd);
-
+    //perfOkvsPSI(cmd);
+    networkSocketExampleRun(cmd);
     return 0;
 }

@@ -181,8 +181,8 @@ tests/CMakeFiles/volePSI_Tests.dir/clean:
 # Target rules for target okvspsi/CMakeFiles/okvspsi.dir
 
 # All Build rule for target.
-okvspsi/CMakeFiles/okvspsi.dir/all: tests/CMakeFiles/volePSI_Tests.dir/all
 okvspsi/CMakeFiles/okvspsi.dir/all: volePSI/CMakeFiles/volePSI.dir/all
+okvspsi/CMakeFiles/okvspsi.dir/all: tests/CMakeFiles/volePSI_Tests.dir/all
 	$(MAKE) $(MAKESILENT) -f okvspsi/CMakeFiles/okvspsi.dir/build.make okvspsi/CMakeFiles/okvspsi.dir/depend
 	$(MAKE) $(MAKESILENT) -f okvspsi/CMakeFiles/okvspsi.dir/build.make okvspsi/CMakeFiles/okvspsi.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/user/lgw/c++/okvsPSI/out/build/linux/CMakeFiles --progress-num=1,2,3 "Built target okvspsi"

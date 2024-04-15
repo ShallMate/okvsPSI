@@ -11,3 +11,4 @@
 
 
 void perfOkvsPSI(oc::CLP& cmd);
+void networkSocketExampleRun(oc::CLP& cmd);

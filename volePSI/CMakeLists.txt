@@ -1,5 +1,6 @@
 
 configure_file(config.h.in "config.h" )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fconcepts")
 
 
 set(SRCS
