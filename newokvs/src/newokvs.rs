@@ -5,7 +5,7 @@ use crate::okvs::OkvsEncoder;
 use crate::hash::Hashable;
 use crate::Block;
 
-type SnapBlock = u64;
+type Bucket = u64;
 const SNAP_LEN: usize = 64;
 
 const DEBUG: bool = true;
@@ -20,11 +20,11 @@ pub struct OKVS {
 }
 
 #[inline]
-fn hash_row_k<T>(key: &T, count: usize) -> (usize, Vec<SnapBlock>) where T: Hashable + std::any::Any {
+fn hash_row_k<T>(key: &T, count: usize) -> (usize, Vec<Bucket>) where T: Hashable + std::any::Any {
     let mut hash = key.hash_to_hasher().finalize_xof();
     if std::any::TypeId::of::<T>() == std::any::TypeId::of::<Block>() {
         let key = unsafe {*(key as *const T as *const Block)};
-        let required_bytes = 8 + count * std::mem::size_of::<SnapBlock>();
+        let required_bytes = 8 + count * std::mem::size_of::<Bucket>();
         let required_blocks = (required_bytes + 15) / 16;
         let mut buf = vec![Block::default(); required_blocks];
         for i in 0..required_blocks {
@@ -39,17 +39,17 @@ fn hash_row_k<T>(key: &T, count: usize) -> (usize, Vec<SnapBlock>) where T: Hash
             // take the latter count * 8 bytes of buf
             let buf1 = std::slice::from_raw_parts(
                 (buf.as_ptr() as *const u8).add(8),
-                count * std::mem::size_of::<SnapBlock>()
+                count * std::mem::size_of::<Bucket>()
             );
             let mut start_index = 0;
             std::slice::from_raw_parts_mut(
                 &mut start_index as *mut usize as *mut u8,
                 std::mem::size_of::<usize>()
             ).copy_from_slice(buf0);
-            let mut offsets = vec![0 as SnapBlock; count];
+            let mut offsets = vec![0 as Bucket; count];
             std::slice::from_raw_parts_mut(
                 offsets.as_mut_ptr() as *mut u8,
-                count * std::mem::size_of::<SnapBlock>()
+                count * std::mem::size_of::<Bucket>()
             ).copy_from_slice(buf1);
             (start_index, offsets)
         }
@@ -62,18 +62,18 @@ fn hash_row_k<T>(key: &T, count: usize) -> (usize, Vec<SnapBlock>) where T: Hash
             ));
         }
         start_index %= count * SNAP_LEN;
-        let mut offsets = vec![0 as SnapBlock; count];
+        let mut offsets = vec![0 as Bucket; count];
         unsafe {
             hash.fill(std::slice::from_raw_parts_mut(
                 offsets.as_mut_ptr() as *mut u8,
-                count * std::mem::size_of::<SnapBlock>()
+                count * std::mem::size_of::<Bucket>()
             ));
         }
         (start_index, offsets)
     }
 }
 
-fn row_k<Key>(key: &Key, m: usize, width: usize) -> (usize, Vec<SnapBlock>) where Key: Hashable + std::any::Any {
+fn row_k<Key>(key: &Key, m: usize, width: usize) -> (usize, Vec<Bucket>) where Key: Hashable + std::any::Any {
     let count = (width - 2 + SNAP_LEN) / SNAP_LEN + 1;
     let (mut start_index, mut offsets) = hash_row_k(key, count);
     start_index %= m - width;
@@ -105,7 +105,7 @@ impl OKVS {
 
 impl<Key, Value> OkvsEncoder<Key, Value> for OKVS where
     Key: Hashable + std::any::Any,
-    Value: Default + Clone + From<SnapBlock> + std::ops::Mul<Output=Value> + std::ops::BitXorAssign
+    Value: Default + Clone + From<Bucket> + std::ops::Mul<Output=Value> + std::ops::BitXorAssign
 {
 
     fn encode(&self, map: &Vec<(Key, Value)>) -> Vec<Value> {
@@ -204,7 +204,7 @@ impl<Key, Value> OkvsEncoder<Key, Value> for OKVS where
 
 impl<Key, Value> OkvsDecoder<Key, Value> for OKVS where
     Key: Hashable + std::any::Any,
-    Value: Default + Clone + From<SnapBlock> + std::ops::Mul<Output=Value> + std::ops::BitXorAssign
+    Value: Default + Clone + From<Bucket> + std::ops::Mul<Output=Value> + std::ops::BitXorAssign
 {
     fn decode(&self, okvs: &[Value], key: &Key) -> Value {
         let (start_index, offsets) = row_k(key, okvs.len(), self.width);
