@@ -46,8 +46,8 @@ void perfOkvsPSI(oc::CLP& cmd)
 		send.mSender.mVoleSender.setBaseOts(recvBase, recvChoice);
 		timer.setTimePoint("fakeBase");
 	}
-	recv.init(ns, nr, 40, ZeroBlock, mal, nt);
-	send.init(ns, nr, 40, ZeroBlock, mal, nt);
+	recv.init(ns, nr, 40, ZeroBlock, mal, nt,e);
+	send.init(ns, nr, 40, ZeroBlock, mal, nt,e);
 
 	recv.setMultType(type);
 	send.setMultType(type);

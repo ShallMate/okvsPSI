@@ -20,7 +20,6 @@ namespace volePSI
 	{
 		return SimpleIndex::get_bin_size(numBins, numBalls, statSecParam);
 	}
-
 	template<typename ValueType>
 	void OKVS::solve(span<const block> inputs, span<const ValueType> values, span<ValueType> output, PRNG* prng, u64 numThreads)
 	{
@@ -29,7 +28,6 @@ namespace volePSI
 		auto h = P.defaultHelper();
 		solve(inputs, V, P, prng, numThreads, h);
 	}
-
 	template<typename ValueType>
 	void OKVS::solve(span<const block> inputs, MatrixView<const ValueType> values, MatrixView<ValueType> output, PRNG* prng, u64 numThreads)
 	{
@@ -62,7 +60,6 @@ namespace volePSI
 			solve(inputs, V, P, prng, numThreads, h);
 		}
 	}
-
 	template<typename Vec, typename ConstVec, typename Helper>
 	void OKVS::solve(
 		span<const block> inputs,
@@ -117,9 +114,7 @@ namespace volePSI
 			paxos.encode(vals_, p_, h, prng);
 			return;
 		}
-
 		numThreads = std::max<u64>(1, numThreads);
-
 		static constexpr const u64 batchSize = 32;
 		auto totalNumBins = mNumBins * numThreads;
 		auto itemsPerThrd = (mNumItems + numThreads - 1) / numThreads;
@@ -326,7 +321,6 @@ namespace volePSI
 		PxVector<ValueType> V(values);
 		PxVector<const ValueType> P(p);
 		auto h = V.defaultHelper();
-
 		decode(inputs, V, P, h, numThreads);
 	}
 

@@ -185,6 +185,7 @@ namespace volePSI
 			if (weight == 3) ee = 1.223;
 			if (weight == 4) ee = 1.293;
 			if (weight >= 5) ee = 0.1485 * weight + 0.6845;
+			//ee = 1.01;
 
 
 			double logW = std::log2(weight);

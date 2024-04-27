@@ -1,5 +1,3 @@
-//! Seems to be buggy. Don't use it.
-
 use crate::okvs::OkvsDecoder;
 use crate::okvs::OkvsEncoder;
 use crate::hash::Hashable;
