@@ -14,7 +14,7 @@ struct Arguments {
     n: usize,
     #[arg(short, long, default_value_t = 0.0)]
     epsilon: f64,
-    #[arg(short, long, default_value_t = 448)]
+    #[arg(short, long, default_value_t = 440)]
     width: usize,
 }
 
@@ -33,7 +33,7 @@ fn test_encoder<E>(args: Arguments, encoder: E) where
 
     let keys = map.iter().map(|(k, _)| k.clone()).collect::<Vec<_>>();
     let values = encoder.decode_many(&s, &keys);
-    let num_cores = num_cpus::get()/4;
+    let num_cores = num_cpus::get()/8;
     let start = Instant::now();
     let decoded = encoder.decode_many(&s, &keys);
     let duration = start.elapsed();

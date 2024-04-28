@@ -153,10 +153,6 @@ impl<Key, Value> OkvsEncoder<Key, Value> for OKVS where
                 let k_id = start_indices[k] / SNAP_LEN;
                 let id_offset = k_id - i_id;
                 if (offsets[k][j / SNAP_LEN - id_offset] >> (j % SNAP_LEN)) & 1 != 0 {
-                    // xor row i from row k
-                    // println!("substract row {} from row {}, i_id={}, k_id={}, klen={}", i, k, i_id, k_id, offsets[k].len());
-                    // println!("before row[{:2}] = {}", i, print_row(start_indices[i], &offsets[i]));
-                    // println!("before row[{:2}] = {}", k, print_row(start_indices[k], &offsets[k]));
                     let vi = v[i].clone();
                     v[k] ^= vi;
                     unsafe {xor_u64s_inplace(
@@ -168,13 +164,6 @@ impl<Key, Value> OkvsEncoder<Key, Value> for OKVS where
             }
         }
         if DEBUG {timer.finish("Encode time");}
-
-        // println!("Final matrix:");
-        // for i in 0..n {
-        //     println!("i={:02}, {}", i, print_row(start_indices[i], &offsets[i]));
-        // }
-
-        // Reverse solve
         let mut s = vec![Value::default(); m];
         for i in (0..n).rev() {
             let mut j = 0;
@@ -228,7 +217,7 @@ pub mod tests {
     #[test]
     pub fn OKVS_encode() {
         let mut map = Vec::new();
-        let n: usize = 200;
+        let n: usize = 1024;
         let width: usize = 87;
         let keys = (0..n).collect::<Vec<_>>();
         for &i in &keys {

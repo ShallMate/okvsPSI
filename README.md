@@ -29,10 +29,10 @@ cd out/build/linux/okvspsi/
 -nt threadnum
 
 cd target/release/examples/
-./perf -n 1048576 -w 448 -e 0.01
+./perf -n 1048576 -w 440 -e 0.01
 -n how many, default 1048576
 -e epsilon, default 0.01 for OKVS
--w width, default 448
+-w width, default 440
 ```
 
 ### Okvs Result example
